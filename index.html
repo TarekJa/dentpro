@@ -270,10 +270,12 @@
     </div>
 
     <script>
-        let patients = JSON.parse(localStorage.getItem('dentproPatients')) || [];
-        let currentFilter = { from: null, to: null };
-        let statsUnlocked = false;
-        const FINANCIAL_PASSWORD = "123456";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxVeqdee0ihwhr_TOn17icb85YBxGI1wSg4BdI1lxFgpLEHRWWkg3Wfd7xB1E5rWwz9lg/exec";
+
+let patients = [];
+let currentFilter = { from: null, to: null };
+let statsUnlocked = false;
+const FINANCIAL_PASSWORD = "123456";
 
         function toLatinNumbers(str) {
             return str.toString().replace(/[\u0660-\u0669]/g, d => d.charCodeAt(0) - 1632);
@@ -285,9 +287,23 @@
             return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
         }
 
-        function savePatients() {
-            localStorage.setItem('dentproPatients', JSON.stringify(patients));
-        }
+        async function loadPatients() {
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "getAll"
+            })
+        });
+
+        patients = await res.json();
+        renderPatients();
+
+    } catch (err) {
+        console.error(err);
+        alert("فشل الاتصال بقاعدة البيانات");
+    }
+}
 
         function getFilteredPatients() {
             let filtered = patients;
@@ -370,29 +386,74 @@
                 row.onclick = () => showPatientDetails(i);
                 tbody.appendChild(row);
             });
-            updateStats();
-        }
+updateStats();
 
-        function updateStats() {
-            const filtered = getFilteredPatients();
-            document.getElementById('total-patients').textContent = toLatinNumbers(filtered.length);
-            
-            if (statsUnlocked) {
-                let totalDebt = 0, todayRev = 0;
-                const today = new Date().toISOString().split('T')[0];
-                filtered.forEach(p => {
-                    const paid = p.payments ? p.payments.reduce((sum, pay) => sum + pay.amount, 0) : 0;
-                    const disc = (p.cost * (p.discountPercent || 0)) / 100;
-                    totalDebt += Math.max(0, p.cost - disc - paid);
-                    if (p.date === today) todayRev += paid;
+}
+            function updateStats() {
+
+    const filtered = getFilteredPatients();
+
+    document.getElementById('total-patients').textContent =
+        toLatinNumbers(filtered.length);
+
+    if (statsUnlocked) {
+
+        let totalDebt = 0;
+        let todayRev = 0;
+
+        const today =
+            new Date().toISOString().split('T')[0];
+
+        filtered.forEach(p => {
+
+            const paid = p.payments
+                ? p.payments.reduce(
+                    (sum, pay) => sum + Number(pay.amount || 0),
+                    0
+                )
+                : 0;
+
+            const disc =
+                (p.cost * (p.discountPercent || 0)) / 100;
+
+            totalDebt += Math.max(
+                0,
+                p.cost - disc - paid
+            );
+
+            if (p.payments) {
+
+                p.payments.forEach(pay => {
+
+                    if (pay.date === today) {
+
+                        todayRev += Number(
+                            pay.amount || 0
+                        );
+
+                    }
+
                 });
-                document.getElementById('total-debt').textContent = toLatinNumbers(totalDebt.toFixed(2)) + " $";
-                document.getElementById('today-revenue').textContent = toLatinNumbers(todayRev.toFixed(2)) + " $";
-            } else {
-                document.getElementById('total-debt').textContent = '***';
-                document.getElementById('today-revenue').textContent = '***';
+
             }
-        }
+
+        });
+
+        document.getElementById('total-debt').textContent =
+            toLatinNumbers(totalDebt.toFixed(2)) + " $";
+
+        document.getElementById('today-revenue').textContent =
+            toLatinNumbers(todayRev.toFixed(2)) + " $";
+
+    } else {
+
+        document.getElementById('total-debt').textContent = "***";
+
+        document.getElementById('today-revenue').textContent = "***";
+
+    }
+
+}
 
         function checkPasswordForStats() {
             const pass = prompt("أدخل كلمة المرور لعرض البيانات المالية:");
@@ -451,30 +512,71 @@
             });
         }
 
-        function addPatient(e) {
-            e.preventDefault();
-            const cost = Math.max(0, parseFloat(document.getElementById('cost').value));
-            const percent = Math.max(0, Math.min(100, parseFloat(document.getElementById('discount-percent').value) || 0));
-            const firstPayment = Math.max(0, parseFloat(document.getElementById('first-payment').value) || 0);
+        async function addPatient(e) {
+    e.preventDefault();
 
-            const newPatient = {
-                nationalId: document.getElementById('national-id').value,
-                name: document.getElementById('patient-name').value,
-                phone: document.getElementById('phone').value,
-                date: document.getElementById('visit-date').value || new Date().toISOString().split('T')[0],
-                treatment: document.getElementById('treatment').value,
-                cost: cost,
-                discountPercent: percent,
-                payments: firstPayment > 0 ? [{date: new Date().toISOString().split('T')[0], amount: firstPayment, notes: "الدفعة الأولى"}] : []
-            };
+    const cost = Math.max(
+        0,
+        parseFloat(document.getElementById('cost').value)
+    );
 
-            patients.unshift(newPatient);
-            savePatients();
-            renderPatients();
-            showSection('patients');
-            resetForm();
-            showToast("تم إضافة المريض بنجاح ✓");
-        }
+    const percent = Math.max(
+        0,
+        Math.min(
+            100,
+            parseFloat(
+                document.getElementById('discount-percent').value
+            ) || 0
+        )
+    );
+
+    const firstPayment = Math.max(
+        0,
+        parseFloat(
+            document.getElementById('first-payment').value
+        ) || 0
+    );
+
+    const newPatient = {
+        nationalId: document.getElementById('national-id').value,
+        name: document.getElementById('patient-name').value,
+        phone: document.getElementById('phone').value,
+        date: document.getElementById('visit-date').value ||
+              new Date().toISOString().split('T')[0],
+        treatment: document.getElementById('treatment').value,
+        cost: cost,
+        discountPercent: percent,
+        payments: firstPayment > 0
+            ? [{
+                date: new Date().toISOString().split('T')[0],
+                amount: firstPayment,
+                notes: "الدفعة الأولى"
+            }]
+            : []
+    };
+
+    try {
+
+        await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "add",
+                patient: newPatient
+            })
+        });
+
+        showToast("تم إضافة المريض بنجاح ✓");
+
+        resetForm();
+        showSection('patients');
+
+        await loadPatients();
+
+    } catch (err) {
+        console.error(err);
+        showToast("خطأ في الحفظ");
+    }
+}
 
         function resetForm() {
             document.getElementById('patient-form').reset();
@@ -536,29 +638,72 @@
             document.getElementById('details-modal').classList.remove('hidden');
         }
 
-        function addPayment(globalIndex) {
-            const amount = Math.max(0, parseFloat(document.getElementById('new-payment-amount').value) || 0);
-            if (amount <= 0) return showToast("أدخل مبلغ صحيح");
-            
-            const p = patients[globalIndex];
-            const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + pay.amount, 0) : 0;
-            const discount = (p.cost * (p.discountPercent || 0)) / 100;
-            const remaining = p.cost - discount - totalPaid;
-            
-            if (amount > remaining) return showToast(`المبلغ المتبقي ${toLatinNumbers(remaining.toFixed(2))}$ فقط`);
-            
-            if (!p.payments) p.payments = [];
-            p.payments.push({
-                date: new Date().toISOString().split('T')[0],
-                amount: amount,
-                notes: document.getElementById('new-payment-notes').value || ""
-            });
-            
-            savePatients();
-            closeDetailsModal();
-            renderPatients();
-            showToast("تم إضافة الدفعة بنجاح");
-        }
+        async function addPayment(globalIndex) {
+
+    const amount = Math.max(
+        0,
+        parseFloat(document.getElementById('new-payment-amount').value) || 0
+    );
+
+    if (amount <= 0)
+        return showToast("أدخل مبلغ صحيح");
+
+    const p = patients[globalIndex];
+
+    const totalPaid = p.payments
+        ? p.payments.reduce((sum, pay) => sum + pay.amount, 0)
+        : 0;
+
+    const discount =
+        (p.cost * (p.discountPercent || 0)) / 100;
+
+    const remaining =
+        p.cost - discount - totalPaid;
+
+    if (amount > remaining)
+        return showToast(
+            `المبلغ المتبقي ${toLatinNumbers(
+                remaining.toFixed(2)
+            )}$ فقط`
+        );
+
+    if (!p.payments)
+        p.payments = [];
+
+    p.payments.push({
+        date: new Date().toISOString().split('T')[0],
+        amount: amount,
+        notes:
+            document.getElementById('new-payment-notes')
+                .value || ""
+    });
+
+    try {
+
+        await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "update",
+                patient: p
+            })
+        });
+
+        await loadPatients();
+
+        closeDetailsModal();
+
+        renderPatients();
+
+        showToast("تم إضافة الدفعة بنجاح");
+
+    } catch (err) {
+
+        console.error(err);
+
+        showToast("فشل حفظ الدفعة");
+
+    }
+}
 
         function closeDetailsModal() {
             document.getElementById('details-modal').classList.add('hidden');
@@ -711,12 +856,14 @@
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 2500);
         }
+        window.onload = async () => {
+    document.getElementById('visit-date').value =
+        new Date().toISOString().split('T')[0];
 
-        window.onload = () => {
-            document.getElementById('visit-date').value = new Date().toISOString().split('T')[0];
-            renderPatients();
-            showSection('patients');
-        };
+    await loadPatients();
+
+    showSection('patients');
+};
     </script>
 </body>
 </html>
