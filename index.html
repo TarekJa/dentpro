@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DentPro Clinic - عيادة الأسنان</title>
+    <title>DentPro - مركز العناية بالاسنان</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -190,19 +190,19 @@ input[type="number"] {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div class="bg-zinc-900 rounded-3xl p-7 card border border-yellow-500/20">
                         <div class="flex justify-between">
-                            <div><p class="text-yellow-500">إجمالي المرضى</p><p id="total-patients" class="text-5xl font-bold mt-3">0</p></div>
+                            <div><p class="text-yellow-500">إجمالي عدد المرضى</p><p id="total-patients" class="text-5xl font-bold mt-3">0</p></div>
                             <i class="fas fa-users text-5xl text-yellow-500/20"></i>
                         </div>
                     </div>
                     <div onclick="checkPasswordForStats()" class="bg-zinc-900 rounded-3xl p-7 card border border-yellow-500/20 cursor-pointer">
                         <div class="flex justify-between">
-                            <div><p class="text-yellow-500">الديون المتبقية</p><p id="total-debt" class="text-5xl font-bold mt-3 text-red-400">***</p></div>
+                            <div><p class="text-yellow-500">الدفعات المتبقية</p><p id="total-debt" class="text-5xl font-bold mt-3 text-red-400">***</p></div>
                             <i class="fas fa-money-bill-wave text-5xl text-yellow-500/20"></i>
                         </div>
                     </div>
                     <div onclick="checkPasswordForStats()" class="bg-zinc-900 rounded-3xl p-7 card border border-yellow-500/20 cursor-pointer">
                         <div class="flex justify-between">
-                            <div><p class="text-yellow-500">إيرادات اليوم</p><p id="today-revenue" class="text-5xl font-bold mt-3 text-emerald-400">***</p></div>
+                            <div><p class="text-yellow-500">دفعات اليوم</p><p id="today-revenue" class="text-5xl font-bold mt-3 text-emerald-400">***</p></div>
                             <i class="fas fa-hand-holding-dollar text-5xl text-yellow-500/20"></i>
                         </div>
                     </div>
@@ -217,7 +217,7 @@ input[type="number"] {
                                 <th class="text-right py-5 px-6">رقم الهاتف</th>
                                 <th class="text-right py-5 px-6">التاريخ</th>
                                 <th class="text-right py-5 px-6">التكلفة</th>
-                                <th class="text-right py-5 px-6">الخصم</th>
+                                <th class="text-right py-5 px-6">نسبة الحسم</th>
                                 <th class="text-right py-5 px-6">المدفوع</th>
                                 <th class="text-right py-5 px-6">المتبقي</th>
                                 <th class="text-right py-5 px-6">الحالة</th>
@@ -265,13 +265,13 @@ input[type="number"] {
                                     <input id="cost" type="number" min="0" required oninput="calculateRemaining()" class="w-full bg-black border border-zinc-700 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-lg">
                                 </div>
                                 <div>
-                                    <label class="block text-sm text-zinc-400 mb-2">نسبة الخصم (%)</label>
+                                    <label class="block text-sm text-zinc-400 mb-2">نسبة الحسم (%)</label>
                                     <input id="discount-percent" type="number" min="0" max="100" value="0" oninput="calculateRemaining()" class="w-full bg-black border border-zinc-700 rounded-2xl px-6 py-4 focus:border-yellow-500 outline-none text-lg">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm text-zinc-400 mb-2">مبلغ الخصم</label>
+                                    <label class="block text-sm text-zinc-400 mb-2">مبلغ الحسم</label>
                                     <input id="discount-amount" type="text" readonly class="w-full bg-zinc-950 border border-yellow-500/40 rounded-2xl px-6 py-4 text-yellow-400 font-bold">
                                 </div>
                                 <div>
@@ -554,7 +554,7 @@ if (isNaN(d)) return '';
                         <div><strong>رقم الهوية:</strong> ${p.nationalId}</div>
                         <div><strong>رقم الهاتف:</strong> ${p.phone || '-'}</div>
                         <div><strong>التكلفة:</strong> ${toLatinNumbers(p.cost)} $</div>
-                        <div><strong>الخصم:</strong> ${toLatinNumbers(p.discountPercent||0)}%</div>
+                        <div><strong>نسبة الحسم:</strong> ${toLatinNumbers(p.discountPercent||0)}%</div>
                         <div><strong>المدفوع:</strong> <span class="text-emerald-400">${toLatinNumbers(totalPaid)} $</span></div>
                         <div class="col-span-2"><strong>المتبقي:</strong> <span class="text-xl font-bold text-red-500">${toLatinNumbers(remaining.toFixed(2))} $</span></div>
                     </div>
@@ -642,9 +642,9 @@ if (isNaN(d)) return '';
                     .header-date { position:absolute; top:30px; left:40px; font-size:14px; color:#555; }
                 </style>
                 </head><body>
-                <div class="header-date">تاريخ الطباعة: ${getCurrentDateTime()}</div>
+                <div class="header-date">: ${getCurrentDateTime()}</div>
                 <h1 class="gold">DentPro Clinic</h1>
-                <p class="text-center text-xl">عيادة طب الأسنان الفاخرة</p>
+                <p class="text-center text-xl">مركز دينت برو للعناية بالاسنان</p>
                 <hr style="margin:25px 0">
                 <h2 class="text-2xl">فاتورة علاج</h2>
                 <p><strong>الاسم:</strong> ${p.name}</p>
@@ -652,9 +652,9 @@ if (isNaN(d)) return '';
                 <p><strong>رقم الهاتف:</strong> ${p.phone || '-'}</p>
                 <p><strong>التاريخ:</strong> ${formatDateArabic(p.date)}</p>
                 <p><strong>التكلفة:</strong> ${toLatinNumbers(p.cost)} $</p>
-                <p><strong>نسبة الخصم:</strong> ${toLatinNumbers(discountPercent)}% - المبلغ المخصوم: ${toLatinNumbers(discountAmount.toFixed(2))} $</p>
+                <p><strong>نسبة الحسم:</strong> ${toLatinNumbers(discountPercent)}% - المبلغ المخصوم: ${toLatinNumbers(discountAmount.toFixed(2))} $</p>
                 <hr>
-                <h3 class="mt-6 mb-3">سجل الدفعات (الأحدث أولاً)</h3>
+                <h3 class="mt-6 mb-3">تفاصيل الدفعات</h3>
                 <table><thead><tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظات</th></tr></thead><tbody>${paymentsTable}</tbody></table>
                 <p class="text-xl font-bold mt-6">المدفوع: <span style="color:#10b981">${toLatinNumbers(totalPaid)} $</span></p>
                 <p class="text-xl font-bold">المتبقي: <span style="color:#ef4444">${toLatinNumbers(remaining.toFixed(2))} $</span></p>
@@ -715,7 +715,7 @@ if (isNaN(d)) return '';
                             <p class="text-6xl font-bold mt-3 text-emerald-400">${toLatinNumbers(totalRev.toFixed(2))} $</p>
                         </div>
                         <div class="bg-black p-8 rounded-3xl text-center border border-red-500/30">
-                            <p class="text-red-400">إجمالي الديون المتبقية</p>
+                            <p class="text-red-400">إجمالي الدفعات المتبقية</p>
                             <p class="text-6xl font-bold mt-3 text-red-400">${toLatinNumbers(totalDebt.toFixed(2))} $</p>
                         </div>
                     </div>
@@ -749,7 +749,7 @@ if (isNaN(d)) return '';
                     "التاريخ": formatDateArabic(p.date),
                     "نوع العلاج": p.treatment,
                     "التكلفة": p.cost,
-                    "نسبة الخصم": p.discountPercent,
+                    "نسبة الحسم": p.discountPercent,
                     "المدفوع": totalPaid,
                     "المتبقي": Math.max(0, p.cost - discount - totalPaid)
                 };
