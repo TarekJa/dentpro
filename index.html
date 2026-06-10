@@ -45,7 +45,6 @@
             box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
         }
       
-        /* تحسين شريط البحث والفلتر */
         #search-input {
             height: 52px !important;
             font-size: 1rem;
@@ -67,9 +66,15 @@
             font-weight: 600;
         }
       
+        .amount-paid { color: #10b981 !important; font-weight: 600; }
+        .amount-remaining { color: #ef4444 !important; font-weight: 700; }
+      
         @media (max-width: 768px) {
             .flex.h-screen { flex-direction: column; }
             .w-72 { width: 100%; height: auto; border-b-4: 4px solid #f1c40f; }
+            .search-filter-container { flex-direction: column; align-items: stretch; }
+            table { font-size: 0.9rem; min-width: 700px; }
+            th, td { padding: 12px 8px !important; white-space: nowrap; }
         }
       
         @media print {
@@ -111,15 +116,15 @@
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-6 py-6 gap-4">
                     <h2 class="text-3xl font-bold" id="page-title">قائمة المرضى</h2>
                   
-                    <div class="flex items-center gap-4 w-full md:w-auto flex-wrap">
-                        <div class="relative">
+                    <div class="search-filter-container flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full md:w-auto">
+                        <div class="relative w-full md:w-80">
                             <input id="search-input" type="text" onkeyup="searchPatients()"
                                    placeholder="ابحث بالاسم أو رقم الهوية أو الهاتف..."
-                                   class="bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-3.5 w-80 focus:outline-none focus:border-yellow-500">
+                                   class="bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-3.5 w-full focus:outline-none focus:border-yellow-500">
                             <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500"></i>
                         </div>
                       
-                        <div class="flex items-center gap-4 bg-zinc-800 rounded-3xl px-5 py-3 border border-yellow-500/50 date-filter">
+                        <div class="flex items-center gap-4 bg-zinc-800 rounded-3xl px-5 py-3 border border-yellow-500/50 date-filter w-full md:w-auto">
                             <div class="flex items-center gap-2">
                                 <span class="text-yellow-400 text-sm font-medium">من</span>
                                 <input id="filter-from" type="date" onchange="applyDateFilter()" class="rounded-2xl px-4 py-2 text-sm focus:outline-none">
@@ -141,7 +146,7 @@
             </header>
          
             <!-- Patients Section -->
-            <div id="section-patients" class="p-6 md:p-8">
+            <div id="section-patients" class="p-4 md:p-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div class="bg-zinc-900 rounded-3xl p-7 card border border-yellow-500/20">
                         <div class="flex justify-between">
@@ -163,8 +168,8 @@
                     </div>
                 </div>
              
-                <div class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-700">
-                    <table class="w-full">
+                <div class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-700 overflow-x-auto">
+                    <table class="w-full min-w-[800px]">
                         <thead class="bg-black">
                             <tr>
                                 <th class="text-right py-5 px-6">رقم الهوية</th>
@@ -192,7 +197,6 @@
                             <i class="fas fa-user-plus"></i> إضافة مريض جديد
                         </h3>
                         <form id="patient-form" onsubmit="addPatient(event)" class="space-y-8">
-                            <!-- نفس النموذج من الكود الأصلي -->
                             <div class="grid grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm text-zinc-400 mb-2">رقم الهوية الوطنية</label>
@@ -290,13 +294,14 @@
             const d = new Date(dateStr);
             return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
         }
+        function getCurrentDateTime() {
+            const now = new Date();
+            return `${formatDateArabic(now.toISOString())} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+        }
 
         async function loadPatients() {
             try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: "getAll" })
-                });
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "getAll" }) });
                 patients = await res.json();
                 renderPatients();
             } catch (err) {
@@ -318,20 +323,31 @@
             return filtered;
         }
 
-        function renderPatients() {
-            const filtered = getFilteredPatients();
+        function renderPatients(searchTerm = '') {
+            let data = getFilteredPatients();
+            if (searchTerm) {
+                const q = searchTerm.toLowerCase().trim();
+                data = data.filter(p =>
+                    (p.nationalId || '').toLowerCase().includes(q) ||
+                    (p.name || '').toLowerCase().includes(q) ||
+                    (p.phone || '').toLowerCase().includes(q)
+                );
+            }
+            
             const tbody = document.getElementById('patients-table');
             tbody.innerHTML = '';
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-16 text-zinc-500">لا يوجد مرضى</td></tr>`;
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-16 text-zinc-500">لا يوجد نتائج</td></tr>`;
                 updateStats();
                 return;
             }
-            filtered.forEach((p) => {
+            
+            data.forEach((p) => {
                 const i = patients.indexOf(p);
                 const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
                 const discountAmt = (p.cost * (p.discountPercent || 0)) / 100;
                 const remaining = Math.max(0, p.cost - discountAmt - totalPaid);
+                
                 const status = remaining > 0 ?
                     `<span class="px-5 py-1.5 bg-red-500/20 text-red-400 rounded-full text-sm">متبقي</span>` :
                     `<span class="px-5 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full text-sm">مكتمل</span>`;
@@ -345,8 +361,8 @@
                     <td class="py-5 px-6">${formatDateArabic(p.date)}</td>
                     <td class="py-5 px-6">${toLatinNumbers(p.cost)}</td>
                     <td class="py-5 px-6 text-yellow-400">${toLatinNumbers(p.discountPercent||0)}%</td>
-                    <td class="py-5 px-6 font-medium text-emerald-400">${toLatinNumbers(totalPaid)}</td>
-                    <td class="py-5 px-6 font-bold text-red-500">${toLatinNumbers(remaining.toFixed(2))}</td>
+                    <td class="py-5 px-6 font-medium amount-paid">${toLatinNumbers(totalPaid)}</td>
+                    <td class="py-5 px-6 font-bold amount-remaining">${toLatinNumbers(remaining.toFixed(2))}</td>
                     <td class="py-5 px-6">${status}</td>
                     <td class="py-5 px-6">
                         <button onclick="showPatientDetails(${i}); event.stopImmediatePropagation();" class="text-yellow-500 hover:text-yellow-400 mx-2"><i class="fas fa-eye"></i></button>
@@ -360,59 +376,15 @@
         }
 
         function searchPatients() {
-            const q = document.getElementById('search-input').value.toLowerCase().trim();
-            const filtered = getFilteredPatients().filter(p =>
-                (p.nationalId || '').toLowerCase().includes(q) ||
-                (p.name || '').toLowerCase().includes(q) ||
-                (p.phone || '').toLowerCase().includes(q)
-            );
-            
-            const tbody = document.getElementById('patients-table');
-            tbody.innerHTML = '';
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-16 text-zinc-500">لا يوجد نتائج</td></tr>`;
-                return;
-            }
-            filtered.forEach((p) => {
-                const i = patients.indexOf(p);
-                const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
-                const discountAmt = (p.cost * (p.discountPercent || 0)) / 100;
-                const remaining = Math.max(0, p.cost - discountAmt - totalPaid);
-                const status = remaining > 0 ?
-                    `<span class="px-5 py-1.5 bg-red-500/20 text-red-400 rounded-full text-sm">متبقي</span>` :
-                    `<span class="px-5 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full text-sm">مكتمل</span>`;
-                
-                const row = document.createElement('tr');
-                row.className = "hover:bg-zinc-800/70 transition-colors cursor-pointer";
-                row.innerHTML = `
-                    <td class="py-5 px-6 font-mono">${p.nationalId}</td>
-                    <td class="py-5 px-6 font-semibold">${p.name}</td>
-                    <td class="py-5 px-6">${p.phone || '-'}</td>
-                    <td class="py-5 px-6">${formatDateArabic(p.date)}</td>
-                    <td class="py-5 px-6">${toLatinNumbers(p.cost)}</td>
-                    <td class="py-5 px-6 text-yellow-400">${toLatinNumbers(p.discountPercent||0)}%</td>
-                    <td class="py-5 px-6 font-medium text-emerald-400">${toLatinNumbers(totalPaid)}</td>
-                    <td class="py-5 px-6 font-bold text-red-500">${toLatinNumbers(remaining.toFixed(2))}</td>
-                    <td class="py-5 px-6">${status}</td>
-                    <td class="py-5 px-6">
-                        <button onclick="showPatientDetails(${i}); event.stopImmediatePropagation();" class="text-yellow-500 hover:text-yellow-400 mx-2"><i class="fas fa-eye"></i></button>
-                        <button onclick="printInvoice(${i}); event.stopImmediatePropagation();" class="text-emerald-500 hover:text-emerald-400 mx-2"><i class="fas fa-print"></i></button>
-                    </td>
-                `;
-                row.onclick = () => showPatientDetails(i);
-                tbody.appendChild(row);
-            });
+            const searchTerm = document.getElementById('search-input').value;
+            renderPatients(searchTerm);
         }
 
         function applyDateFilter() {
             currentFilter.from = document.getElementById('filter-from').value;
             currentFilter.to = document.getElementById('filter-to').value;
             resetFinancialCards();
-            if (!document.getElementById('section-reports').classList.contains('hidden')) {
-                renderReports();
-            } else {
-                renderPatients();
-            }
+            renderPatients(document.getElementById('search-input').value);
         }
 
         function resetDateFilter() {
@@ -420,11 +392,7 @@
             document.getElementById('filter-to').value = '';
             currentFilter = { from: null, to: null };
             resetFinancialCards();
-            if (!document.getElementById('section-reports').classList.contains('hidden')) {
-                renderReports();
-            } else {
-                renderPatients();
-            }
+            renderPatients(document.getElementById('search-input').value);
         }
 
         function resetFinancialCards() {
@@ -461,7 +429,6 @@
             }
         }
 
-        // باقي الدوال (addPatient, showPatientDetails, إلخ) كاملة من الكود الأصلي
         async function addPatient(e) {
             e.preventDefault();
             const cost = Math.max(0, parseFloat(document.getElementById('cost').value) || 0);
@@ -585,6 +552,7 @@
             const discountAmount = (p.cost * discountPercent) / 100;
             const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
             const remaining = Math.max(0, p.cost - discountAmount - totalPaid);
+            
             let paymentsTable = p.payments && p.payments.length ?
                 p.payments.slice().reverse().map(pay => `
                     <tr><td>${formatDateArabic(pay.date)}</td><td>${toLatinNumbers(pay.amount)} $</td><td>${pay.notes || '-'}</td></tr>
@@ -599,21 +567,27 @@
                     table{width:100%;border-collapse:collapse;margin:20px 0}
                     th,td{border:1px solid #ddd;padding:10px;text-align:center}
                     th{background:#f1c40f;color:black}
+                    .header-date { position:absolute; top:40px; left:40px; font-size:14px; color:#555; }
                 </style>
                 </head><body>
+                <div class="header-date">تاريخ الطباعة: ${getCurrentDateTime()}</div>
                 <h1 class="gold">DentPro Clinic</h1>
                 <p class="text-center text-xl">عيادة طب الأسنان الفاخرة</p>
-                <hr>
-                <h2>فاتورة علاج</h2>
+                <hr style="margin:25px 0">
+                <h2 class="text-2xl">فاتورة علاج</h2>
                 <p><strong>الاسم:</strong> ${p.name}</p>
                 <p><strong>رقم الهوية:</strong> ${p.nationalId}</p>
+                <p><strong>رقم الهاتف:</strong> ${p.phone || '-'}</p>
                 <p><strong>التاريخ:</strong> ${formatDateArabic(p.date)}</p>
                 <p><strong>التكلفة:</strong> ${toLatinNumbers(p.cost)} $</p>
-                <p><strong>الخصم:</strong> ${toLatinNumbers(discountPercent)}% (${toLatinNumbers(discountAmount.toFixed(2))} $)</p>
-                <h3>سجل الدفعات</h3>
+                <p><strong>نسبة الخصم:</strong> ${toLatinNumbers(discountPercent)}% - المبلغ المخصوم: ${toLatinNumbers(discountAmount.toFixed(2))} $</p>
+                <hr>
+                <h3 class="mt-6 mb-3">سجل الدفعات (الأحدث أولاً)</h3>
                 <table><thead><tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظات</th></tr></thead><tbody>${paymentsTable}</tbody></table>
-                <p class="text-xl font-bold">المدفوع: ${toLatinNumbers(totalPaid)} $</p>
-                <p class="text-xl font-bold">المتبقي: ${toLatinNumbers(remaining.toFixed(2))} $</p>
+                <p class="text-xl font-bold mt-6">المدفوع: <span style="color:#10b981">${toLatinNumbers(totalPaid)} $</span></p>
+                <p class="text-xl font-bold">المتبقي: <span style="color:#ef4444">${toLatinNumbers(remaining.toFixed(2))} $</span></p>
+                <hr>
+                <p class="mt-10 text-center">شكراً لثقتكم بدنت برو</p>
                 </body></html>
             `);
             printWindow.document.close();
@@ -630,7 +604,7 @@
             const titles = {patients: "قائمة المرضى", add: "إضافة مريض جديد", reports: "التقارير المالية"};
             document.getElementById('page-title').textContent = titles[sec];
             
-            if (sec === 'patients') renderPatients();
+            if (sec === 'patients') renderPatients(document.getElementById('search-input').value);
             if (sec === 'reports') {
                 document.getElementById('password-prompt').classList.remove('hidden');
                 document.getElementById('report-content').classList.add('hidden');
@@ -665,11 +639,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-black p-8 rounded-3xl text-center border border-emerald-500/30">
                             <p class="text-emerald-400">إجمالي الإيرادات</p>
-                            <p class="text-6xl font-bold mt-3">${toLatinNumbers(totalRev.toFixed(2))} $</p>
+                            <p class="text-6xl font-bold mt-3 text-emerald-400">${toLatinNumbers(totalRev.toFixed(2))} $</p>
                         </div>
                         <div class="bg-black p-8 rounded-3xl text-center border border-red-500/30">
                             <p class="text-red-400">إجمالي الديون المتبقية</p>
-                            <p class="text-6xl font-bold mt-3">${toLatinNumbers(totalDebt.toFixed(2))} $</p>
+                            <p class="text-6xl font-bold mt-3 text-red-400">${toLatinNumbers(totalDebt.toFixed(2))} $</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
