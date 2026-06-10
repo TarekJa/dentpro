@@ -13,9 +13,7 @@
       
         body { font-family: 'Cairo', sans-serif; }
       
-        .gold-gradient {
-            background: linear-gradient(135deg, #d4af37, #f1c40f, #e5b80b);
-        }
+        .gold-gradient { background: linear-gradient(135deg, #d4af37, #f1c40f, #e5b80b); }
       
         .nav-link {
             transition: all 0.3s ease;
@@ -23,22 +21,9 @@
         .nav-link:hover, .nav-link.active {
             background-color: #1a1a1a;
             color: #f1c40f;
-            border-right: 5px solid #f1c40f;
         }
       
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #111111; }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(#f1c40f, #d4af37); border-radius: 20px; }
-      
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
-        }
-      
-        #search-input {
-            height: 52px !important;
-            font-size: 1rem;
-        }
+        #search-input { height: 52px !important; font-size: 1rem; }
         #search-input::placeholder { color: #9ca3af; }
         
         .date-filter {
@@ -47,34 +32,79 @@
             border: 2px solid #d4af37;
         }
         
-        .date-filter input {
-            background-color: #fefce8 !important;
-            border: 2px solid #f1c40f !important;
-            color: #1f2937;
-            font-weight: 600;
-        }
-      
         .amount-paid { color: #10b981 !important; font-weight: 600; }
         .amount-remaining { color: #ef4444 !important; font-weight: 700; }
       
         @media (max-width: 768px) {
-            .flex.h-screen { flex-direction: column; }
-            .w-72 { width: 100%; height: auto; border-b-4: 4px solid #f1c40f; }
-            .search-filter-container { flex-direction: column; align-items: stretch; gap: 12px; }
-            table { font-size: 0.9rem; min-width: 720px; }
-            th, td { padding: 12px 8px !important; white-space: nowrap; }
+            .sidebar { display: none; }
+            .mobile-nav { display: flex !important; }
+            .search-filter-container { flex-direction: column; gap: 12px; }
+           
+            th, td { padding: 12px 8px !important; }
         }
-      
-        @media print {
-            body { background: white; color: black; }
-            .no-print { display: none !important; }
+        @media (min-width: 769px) {
+            .sidebar { display: flex; }
+            .mobile-nav { display: none; }
         }
+/* ===== GOLD SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a0a;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d4af37, #f1c40f, #b8860b);
+    border-radius: 10px;
+    border: 2px solid #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #f1c40f, #ffd700, #d4af37);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #0a0a0a;
+}
+/* ===== Remove number input spinners ===== */
+
+/* Chrome, Safari, Edge */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav bg-black border-b border-yellow-500 p-4 flex items-center justify-between sticky top-0 z-50 md:hidden">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl gold-gradient flex items-center justify-center text-3xl">🦷</div>
+            <h1 class="text-2xl font-bold">DentPro</h1>
+        </div>
+        <div class="flex gap-6 text-2xl">
+            <a href="#" onclick="showSection('patients')" id="m-nav-patients" class="text-yellow-400"><i class="fas fa-users"></i></a>
+            <a href="#" onclick="showSection('add')" id="m-nav-add"><i class="fas fa-user-plus"></i></a>
+            <a href="#" onclick="showSection('reports')" id="m-nav-reports"><i class="fas fa-chart-bar"></i></a>
+        </div>
+    </div>
+
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <div class="w-72 bg-black border-l-4 border-yellow-500 flex flex-col">
+        <!-- Desktop Sidebar -->
+        <div class="sidebar w-72 bg-black border-l-4 border-yellow-500 flex-col hidden md:flex">
             <div class="p-6 border-b border-zinc-800">
                 <div class="flex items-center gap-3">
                     <div class="w-14 h-14 rounded-3xl gold-gradient flex items-center justify-center text-4xl shadow-2xl shadow-yellow-500/30">🦷</div>
@@ -84,7 +114,6 @@
                     </div>
                 </div>
             </div>
-         
             <div class="flex-1 py-8 px-4 space-y-2 overflow-auto">
                 <a href="#" onclick="showSection('patients')" class="nav-link active flex items-center gap-3 px-6 py-4 rounded-2xl text-lg" id="nav-patients">
                     <i class="fas fa-users w-6"></i><span>قائمة المرضى</span>
@@ -97,42 +126,44 @@
                 </a>
             </div>
         </div>
-     
+
         <!-- Main Content -->
         <div class="flex-1 overflow-auto">
             <header class="bg-black border-b border-zinc-800 sticky top-0 z-50">
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between px-6 py-6 gap-4">
-                    <h2 class="text-3xl font-bold" id="page-title">قائمة المرضى</h2>
-                  
-                    <div class="search-filter-container flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full md:w-auto">
-                        <div class="relative w-full md:w-80">
-                            <input id="search-input" type="text" onkeyup="searchPatients()"
-                                   placeholder="ابحث بالاسم أو رقم الهوية أو الهاتف..."
-                                   class="bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-3.5 w-full focus:outline-none focus:border-yellow-500">
-                            <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500"></i>
-                        </div>
-                      
-                        <div class="flex items-center gap-4 bg-zinc-800 rounded-3xl px-5 py-3 border border-yellow-500/50 date-filter w-full md:w-auto">
-                            <div class="flex items-center gap-2">
-                                <span class="text-yellow-400 text-sm font-medium">من</span>
-                                <input id="filter-from" type="date" onchange="applyDateFilter()" class="rounded-2xl px-4 py-2 text-sm focus:outline-none">
+                <div class="px-4 md:px-6 py-5">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <h2 class="text-2xl md:text-3xl font-bold" id="page-title">قائمة المرضى</h2>
+                        
+                        <div class="search-filter-container flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                            <div class="relative w-full md:w-80">
+                                <input id="search-input" type="text" onkeyup="searchPatients()" 
+                                       placeholder="ابحث بالاسم أو رقم الهوية أو الهاتف..."
+                                       class="bg-zinc-900 border border-zinc-700 rounded-2xl px-6 py-3.5 w-full focus:outline-none focus:border-yellow-500">
+                                <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500"></i>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-yellow-400 text-sm font-medium">إلى</span>
-                                <input id="filter-to" type="date" onchange="applyDateFilter()" class="rounded-2xl px-4 py-2 text-sm focus:outline-none">
+                            
+                            <div class="flex items-center gap-3 bg-zinc-800 rounded-3xl px-4 py-3 border border-yellow-500/50 date-filter w-full md:w-auto">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-yellow-400 text-sm">من</span>
+                                    <input id="filter-from" type="date" onchange="applyDateFilter()" class="bg-zinc-900 rounded-2xl px-3 py-2 text-sm">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-yellow-400 text-sm">إلى</span>
+                                    <input id="filter-to" type="date" onchange="applyDateFilter()" class="bg-zinc-900 rounded-2xl px-3 py-2 text-sm">
+                                </div>
+                                <button onclick="resetDateFilter()" class="text-yellow-400 hover:text-white">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
-                            <button onclick="resetDateFilter()" class="text-yellow-400 hover:text-white px-1">
-                                <i class="fas fa-times"></i>
+                            
+                            <button onclick="exportToExcel()" class="flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3.5 rounded-2xl border border-yellow-500/30 hover:border-yellow-500">
+                                <i class="fas fa-file-excel"></i><span>Excel</span>
                             </button>
                         </div>
-                      
-                        <button onclick="exportToExcel()" class="flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 px-6 py-3.5 rounded-2xl border border-yellow-500/30 hover:border-yellow-500">
-                            <i class="fas fa-file-excel"></i><span>Excel</span>
-                        </button>
                     </div>
                 </div>
             </header>
-         
+
             <!-- Patients Section -->
             <div id="section-patients" class="p-4 md:p-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -156,7 +187,7 @@
                     </div>
                 </div>
              
-                <div class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-700 overflow-x-auto">
+                <div class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-700 table-container">
                     <table class="w-full min-w-[750px]">
                         <thead class="bg-black">
                             <tr>
@@ -176,7 +207,7 @@
                     </table>
                 </div>
             </div>
-         
+
             <!-- Add Patient Section -->
             <div id="section-add" class="p-8 hidden">
                 <div class="max-w-2xl mx-auto">
@@ -243,7 +274,7 @@
                     </div>
                 </div>
             </div>
-         
+
             <!-- Reports Section -->
             <div id="section-reports" class="p-8 hidden">
                 <div id="password-prompt" class="text-center py-20">
@@ -256,7 +287,7 @@
         </div>
     </div>
 
-    <!-- Patient Details Modal -->
+    <!-- Details Modal -->
     <div id="details-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
         <div class="bg-zinc-900 w-full max-w-2xl mx-4 rounded-3xl p-8 max-h-[90vh] overflow-auto">
             <div class="flex justify-between items-center mb-6">
@@ -279,7 +310,8 @@
         }
         function formatDateArabic(dateStr) {
             if (!dateStr) return '';
-            const d = new Date(dateStr);
+            const d = new Date(dateStr || Date.now());
+if (isNaN(d)) return '';
             return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
         }
         function getCurrentDateTime() {
@@ -313,7 +345,6 @@
 
         function renderPatients(searchTerm = '') {
             let data = getFilteredPatients();
-            
             if (searchTerm) {
                 const q = searchTerm.toLowerCase().trim();
                 data = data.filter(p =>
@@ -338,8 +369,8 @@
                 const discountAmt = (p.cost * (p.discountPercent || 0)) / 100;
                 const remaining = Math.max(0, p.cost - discountAmt - totalPaid);
                 
-                const status = remaining > 0 ?
-                    `<span class="px-5 py-1.5 bg-red-500/20 text-red-400 rounded-full text-sm">متبقي</span>` :
+                const status = remaining > 0 ? 
+                    `<span class="px-5 py-1.5 bg-red-500/20 text-red-400 rounded-full text-sm">متبقي</span>` : 
                     `<span class="px-5 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full text-sm">مكتمل</span>`;
                 
                 const row = document.createElement('tr');
@@ -371,19 +402,36 @@
         }
 
         function applyDateFilter() {
-            currentFilter.from = document.getElementById('filter-from').value;
-            currentFilter.to = document.getElementById('filter-to').value;
-            resetFinancialCards();
-            renderPatients(document.getElementById('search-input').value);
-        }
+    currentFilter.from = document.getElementById('filter-from').value;
+    currentFilter.to = document.getElementById('filter-to').value;
+
+    resetFinancialCards();
+
+    const searchTerm = document.getElementById('search-input').value;
+
+    renderPatients(searchTerm);
+
+    // 🔥 مهم: تحديث التقارير إذا كانت مفتوحة
+    if (!document.getElementById('report-content').classList.contains('hidden')) {
+        renderReports();
+    }
+}
 
         function resetDateFilter() {
-            document.getElementById('filter-from').value = '';
-            document.getElementById('filter-to').value = '';
-            currentFilter = { from: null, to: null };
-            resetFinancialCards();
-            renderPatients(document.getElementById('search-input').value);
-        }
+    document.getElementById('filter-from').value = '';
+    document.getElementById('filter-to').value = '';
+    currentFilter = { from: null, to: null };
+
+    resetFinancialCards();
+
+    const searchTerm = document.getElementById('search-input').value;
+
+    renderPatients(searchTerm);
+
+    if (!document.getElementById('report-content').classList.contains('hidden')) {
+        renderReports();
+    }
+}
 
         function resetFinancialCards() {
             statsUnlocked = false;
@@ -419,7 +467,6 @@
             }
         }
 
-        // Add Patient
         async function addPatient(e) {
             e.preventDefault();
             const cost = Math.max(0, parseFloat(document.getElementById('cost').value) || 0);
@@ -509,30 +556,42 @@
         }
 
         async function addPayment(globalIndex) {
-            const amount = Math.max(0, parseFloat(document.getElementById('new-payment-amount').value) || 0);
-            if (amount <= 0) return showToast("أدخل مبلغ صحيح");
-            const p = patients[globalIndex];
-            const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
-            const discount = (p.cost * (p.discountPercent || 0)) / 100;
-            const remaining = p.cost - discount - totalPaid;
-            if (amount > remaining) return showToast(`المبلغ المتبقي ${toLatinNumbers(remaining.toFixed(2))}$ فقط`);
-            
-            if (!p.payments) p.payments = [];
-            p.payments.push({
-                date: new Date().toISOString(),
-                amount: amount,
-                notes: document.getElementById('new-payment-notes').value || `دفعة ${p.payments.length + 1}`
-            });
-            
-            try {
-                await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "update", patient: p }) });
-                await loadPatients();
-                closeDetailsModal();
-                showToast("تم إضافة الدفعة بنجاح");
-            } catch (err) {
-                showToast("فشل حفظ الدفعة");
-            }
-        }
+    const p = patients[globalIndex];
+
+    const amount = parseFloat(document.getElementById('new-payment-amount').value) || 0;
+    const notes = document.getElementById('new-payment-notes').value || "";
+
+    if (amount <= 0) return showToast("أدخل مبلغ صحيح");
+
+    const totalPaid = (p.payments || []).reduce((sum, pay) => sum + (pay.amount || 0), 0);
+    const discount = (p.cost * (p.discountPercent || 0)) / 100;
+    const remaining = Math.max(0, p.cost - discount - totalPaid);
+
+    if (amount > remaining) {
+        return showToast(`❌ المتبقي فقط: ${toLatinNumbers(remaining.toFixed(2))} $`);
+    }
+
+    if (!p.payments) p.payments = [];
+
+    p.payments.push({
+        date: new Date().toISOString(),
+        amount: amount,
+        notes: notes || `دفعة ${p.payments.length + 1}`
+    });
+
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: "update", patient: p })
+        });
+
+        await loadPatients();
+        closeDetailsModal();
+        showToast("تم إضافة الدفعة بنجاح");
+    } catch (err) {
+        showToast("فشل حفظ الدفعة");
+    }
+}
 
         function closeDetailsModal() {
             document.getElementById('details-modal').classList.add('hidden');
@@ -591,7 +650,8 @@
             document.getElementById(`section-${sec}`).classList.remove('hidden');
             
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(`nav-${sec}`).classList.add('active');
+            const navId = document.getElementById(`nav-${sec}`);
+            if (navId) navId.classList.add('active');
             
             const titles = {patients: "قائمة المرضى", add: "إضافة مريض جديد", reports: "التقارير المالية"};
             document.getElementById('page-title').textContent = titles[sec];
