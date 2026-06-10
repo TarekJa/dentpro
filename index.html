@@ -642,7 +642,7 @@ if (isNaN(d)) return '';
                     .header-date { position:absolute; top:30px; left:40px; font-size:14px; color:#555; }
                 </style>
                 </head><body>
-                <div class="header-date">: ${getCurrentDateTime()}</div>
+                <div class="header-date">🕐${getCurrentDateTime()}</div>
                 <h1 class="gold">DentPro Clinic</h1>
                 <p class="text-center text-xl">مركز دينت برو للعناية بالاسنان</p>
                 <hr style="margin:25px 0">
@@ -659,7 +659,7 @@ if (isNaN(d)) return '';
                 <p class="text-xl font-bold mt-6">المدفوع: <span style="color:#10b981">${toLatinNumbers(totalPaid)} $</span></p>
                 <p class="text-xl font-bold">المتبقي: <span style="color:#ef4444">${toLatinNumbers(remaining.toFixed(2))} $</span></p>
                 <hr>
-                <p class="mt-10 text-center">شكراً لثقتكم بدنت برو</p>
+                <p class="mt-13 text-center">شكراً لثقتكم</p>
                 </body></html>
             `);
             printWindow.document.close();
