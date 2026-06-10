@@ -11,9 +11,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&display=swap');
       
-        body {
-            font-family: 'Cairo', sans-serif;
-        }
+        body { font-family: 'Cairo', sans-serif; }
       
         .gold-gradient {
             background: linear-gradient(135deg, #d4af37, #f1c40f, #e5b80b);
@@ -28,17 +26,9 @@
             border-right: 5px solid #f1c40f;
         }
       
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #111111;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(#f1c40f, #d4af37);
-            border-radius: 20px;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #111111; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(#f1c40f, #d4af37); border-radius: 20px; }
       
         .card:hover {
             transform: translateY(-8px);
@@ -49,9 +39,7 @@
             height: 52px !important;
             font-size: 1rem;
         }
-        #search-input::placeholder {
-            color: #9ca3af;
-        }
+        #search-input::placeholder { color: #9ca3af; }
         
         .date-filter {
             height: 52px;
@@ -72,8 +60,8 @@
         @media (max-width: 768px) {
             .flex.h-screen { flex-direction: column; }
             .w-72 { width: 100%; height: auto; border-b-4: 4px solid #f1c40f; }
-            .search-filter-container { flex-direction: column; align-items: stretch; }
-            table { font-size: 0.9rem; min-width: 700px; }
+            .search-filter-container { flex-direction: column; align-items: stretch; gap: 12px; }
+            table { font-size: 0.9rem; min-width: 720px; }
             th, td { padding: 12px 8px !important; white-space: nowrap; }
         }
       
@@ -169,7 +157,7 @@
                 </div>
              
                 <div class="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-700 overflow-x-auto">
-                    <table class="w-full min-w-[800px]">
+                    <table class="w-full min-w-[750px]">
                         <thead class="bg-black">
                             <tr>
                                 <th class="text-right py-5 px-6">رقم الهوية</th>
@@ -325,17 +313,19 @@
 
         function renderPatients(searchTerm = '') {
             let data = getFilteredPatients();
+            
             if (searchTerm) {
                 const q = searchTerm.toLowerCase().trim();
                 data = data.filter(p =>
-                    (p.nationalId || '').toLowerCase().includes(q) ||
-                    (p.name || '').toLowerCase().includes(q) ||
-                    (p.phone || '').toLowerCase().includes(q)
+                    String(p.nationalId || '').toLowerCase().includes(q) ||
+                    String(p.name || '').toLowerCase().includes(q) ||
+                    String(p.phone || '').toLowerCase().includes(q)
                 );
             }
             
             const tbody = document.getElementById('patients-table');
             tbody.innerHTML = '';
+            
             if (data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="10" class="text-center py-16 text-zinc-500">لا يوجد نتائج</td></tr>`;
                 updateStats();
@@ -429,6 +419,7 @@
             }
         }
 
+        // Add Patient
         async function addPatient(e) {
             e.preventDefault();
             const cost = Math.max(0, parseFloat(document.getElementById('cost').value) || 0);
@@ -479,6 +470,7 @@
             const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
             const discount = (p.cost * (p.discountPercent || 0)) / 100;
             const remaining = Math.max(0, p.cost - discount - totalPaid);
+            
             let paymentsHTML = p.payments && p.payments.length ?
                 p.payments.slice().reverse().map(pay => `
                     <div class="flex justify-between py-2 border-b border-zinc-700">
@@ -567,7 +559,7 @@
                     table{width:100%;border-collapse:collapse;margin:20px 0}
                     th,td{border:1px solid #ddd;padding:10px;text-align:center}
                     th{background:#f1c40f;color:black}
-                    .header-date { position:absolute; top:40px; left:40px; font-size:14px; color:#555; }
+                    .header-date { position:absolute; top:30px; left:40px; font-size:14px; color:#555; }
                 </style>
                 </head><body>
                 <div class="header-date">تاريخ الطباعة: ${getCurrentDateTime()}</div>
