@@ -470,7 +470,15 @@ if (isNaN(d)) return '';
                     const paid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
                     const disc = (p.cost * (p.discountPercent || 0)) / 100;
                     totalDebt += Math.max(0, p.cost - disc - paid);
-                    if (p.date && p.date.startsWith(today)) todayRev += paid;
+                    if (p.payments && p.payments.length) {
+    p.payments.forEach(pay => {
+        const payDate = pay.date?.split('T')[0];
+
+        if (payDate === today) {
+            todayRev += Number(pay.amount || 0);
+        }
+    });
+}
                 });
                 document.getElementById('total-debt').textContent = toLatinNumbers(totalDebt.toFixed(2)) + " $";
                 document.getElementById('today-revenue').textContent = toLatinNumbers(todayRev.toFixed(2)) + " $";
