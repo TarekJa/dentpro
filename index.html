@@ -652,22 +652,22 @@ if (isNaN(d)) return '';
                 </head><body>
                 <div class="header-date">🕐 ${getCurrentDateTime()}</div>
                 <h1 class="gold">DentPro Clinic</h1>
-                <p class="text-center text-xl">🦷مركز (دينت برو) للعناية بالاسنان🦷</p>
+                <p class="text-center text-xl">⭐⭐⭐⭐⭐🦷مركز (دينت برو) للعناية بالاسنان🦷⭐⭐⭐⭐⭐</p>
                 <hr style="margin:25px 0">
                 <h2 class="text-2xl">فاتورة علاج</h2>
-                <p><strong>الاسم:</strong> ${p.name}</p>
-                <p><strong>رقم الهوية:</strong> ${p.nationalId}</p>
-                <p><strong>رقم الهاتف:</strong> ${p.phone || '-'}</p>
-                <p><strong>التاريخ:</strong> ${formatDateArabic(p.date)}</p>
-                <p><strong>التكلفة:</strong> ${toLatinNumbers(p.cost)} $</p>
-                <p><strong>نسبة الحسم:</strong> ${toLatinNumbers(discountPercent)}% - المبلغ المخصوم: ${toLatinNumbers(discountAmount.toFixed(2))} $</p>
+                <p><strong>📝الاسم:</strong> ${p.name}</p>
+                <p><strong>🪪رقم الهوية:</strong> ${p.nationalId}</p>
+                <p><strong>📱رقم الهاتف:</strong> ${p.phone || '-'}</p>
+                <p><strong>📅التاريخ:</strong> ${formatDateArabic(p.date)}</p>
+                <p><strong>💰التكلفة:</strong> ${toLatinNumbers(p.cost)} $</p>
+                <p><strong>‼️نسبة الحسم:</strong> ${toLatinNumbers(discountPercent)}% - المبلغ المخصوم: ${toLatinNumbers(discountAmount.toFixed(2))} $</p>
                 <hr>
-                <h3 class="mt-6 mb-3">تفاصيل الدفعات</h3>
+                <h3 class="mt-5 mb-3">💲تفاصيل الدفعات💲</h3>
                 <table><thead><tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظات</th></tr></thead><tbody>${paymentsTable}</tbody></table>
                 <p class="text-xl font-bold mt-6">المدفوع: <span style="color:#10b981">${toLatinNumbers(totalPaid)} $</span></p>
                 <p class="text-xl font-bold">المتبقي: <span style="color:#ef4444">${toLatinNumbers(remaining.toFixed(2))} $</span></p>
                 <hr>
-                <p class="mt-17 text-center">💫🌟🦷 شكراً لثقتكم 🦷 💫🌟</p>
+                <p class="mt-9 text-center">🌟💫✨🦷 شكراً لثقتكم 🦷✨💫🌟</p>
                 </body></html>
             `);
             printWindow.document.close();
