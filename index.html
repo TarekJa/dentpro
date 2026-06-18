@@ -627,52 +627,120 @@ if (isNaN(d)) return '';
         }
 
         function printInvoice(globalIndex) {
-            const p = patients[globalIndex];
-            const discountPercent = p.discountPercent || 0;
-            const discountAmount = (p.cost * discountPercent) / 100;
-            const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
-            const remaining = Math.max(0, p.cost - discountAmount - totalPaid);
+    const p = patients[globalIndex];
+    const discountPercent = p.discountPercent || 0;
+    const discountAmount = (p.cost * discountPercent) / 100;
+    const totalPaid = p.payments ? p.payments.reduce((sum, pay) => sum + (pay.amount || 0), 0) : 0;
+    const remaining = Math.max(0, p.cost - discountAmount - totalPaid);
+   
+    let paymentsTable = p.payments && p.payments.length ?
+        p.payments.slice().reverse().map(pay => `
+            <tr><td>${formatDateArabic(pay.date)}</td><td>${toLatinNumbers(pay.amount)} $</td><td>${pay.notes || '-'}</td></tr>
+        `).join('') : '';
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html dir="rtl">
+        <head>
+            <title>فاتورة - ${p.name}</title>
+            <style>
+                body {
+                    font-family: 'Cairo', sans-serif;
+                    padding: 40px;
+                    max-width: 800px;
+                    margin: auto;
+                    line-height: 1.6;
+                }
+                .gold { color: #d4af37; font-size: 42px; text-align: center; margin: 10px 0; }
+                .subtitle {
+                    text-align: center;
+                    font-size: 22px;
+                    margin: 8px 0 30px 0;
+                    color: #f1c40f;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 25px 0;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 12px;
+                    text-align: center;
+                }
+                th { background: #f1c40f; color: black; }
+                .header-date {
+                    position: absolute;
+                    top: 30px;
+                    left: 40px;
+                    font-size: 14px;
+                    color: #555;
+                }
+                .footer {
+                    margin-top: 60px;
+                    padding-top: 20px;
+                    border-top: 3px solid #d4af37;
+                    text-align: center;
+                    color: #444;
+                    font-size: 15px;
+                }
+                .footer-line {
+                    height: 2px;
+                    background: linear-gradient(to right, transparent, #d4af37, transparent);
+                    margin: 15px 0;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header-date">🕐 ${getCurrentDateTime()}</div>
             
-            let paymentsTable = p.payments && p.payments.length ?
-                p.payments.slice().reverse().map(pay => `
-                    <tr><td>${formatDateArabic(pay.date)}</td><td>${toLatinNumbers(pay.amount)} $</td><td>${pay.notes || '-'}</td></tr>
-                `).join('') : '';
+            <h1 class="gold">DentPro Clinic</h1>
             
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html dir="rtl"><head><title>فاتورة - ${p.name}</title>
-                <style>
-                    body{font-family:'Cairo',sans-serif;padding:40px;max-width:800px;margin:auto}
-                    .gold{color:#d4af37;font-size:42px;text-align:center}
-                    table{width:100%;border-collapse:collapse;margin:20px 0}
-                    th,td{border:1px solid #ddd;padding:10px;text-align:center}
-                    th{background:#f1c40f;color:black}
-                    .header-date { position:absolute; top:30px; left:40px; font-size:14px; color:#555; }
-                </style>
-                </head><body>
-                <div class="header-date">🕐 ${getCurrentDateTime()}</div>
-                <h1 class="gold">DentPro Clinic</h1>
-                <p class="text-center text-xl">⭐⭐⭐⭐⭐🦷مركز (دينت برو) للعناية بالاسنان🦷⭐⭐⭐⭐⭐</p>
-                <hr style="margin:25px 0">
-                <h2 class="text-2xl">فاتورة علاج</h2>
-                <p><strong>📝الاسم:</strong> ${p.name}</p>
-                <p><strong>🪪رقم الهوية:</strong> ${p.nationalId}</p>
-                <p><strong>📱رقم الهاتف:</strong> ${p.phone || '-'}</p>
-                <p><strong>📅التاريخ:</strong> ${formatDateArabic(p.date)}</p>
-                <p><strong>💰التكلفة:</strong> ${toLatinNumbers(p.cost)} $</p>
-                <p><strong>‼️نسبة الحسم:</strong> ${toLatinNumbers(discountPercent)}% - المبلغ المخصوم: ${toLatinNumbers(discountAmount.toFixed(2))} $</p>
-                <hr>
-                <h3 class="mt-5 mb-3">💲تفاصيل الدفعات💲</h3>
-                <table><thead><tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظات</th></tr></thead><tbody>${paymentsTable}</tbody></table>
-                <p class="text-xl font-bold mt-6">المدفوع: <span style="color:#10b981">${toLatinNumbers(totalPaid)} $</span></p>
-                <p class="text-xl font-bold">المتبقي: <span style="color:#ef4444">${toLatinNumbers(remaining.toFixed(2))} $</span></p>
-                <hr>
-                <p class="mt-9 text-center">🌟💫✨🦷 شكراً لثقتكم 🦷✨💫🌟</p>
-                </body></html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
+            <!-- العبارة الجديدة في المنتصف -->
+            <div class="subtitle">
+                ⭐⭐⭐⭐⭐ 🦷 مركز (دينت برو) للعناية بالأسنان 🦷 ⭐⭐⭐⭐⭐
+            </div>
+            
+            <hr style="margin:25px 0">
+            
+            <h2 class="text-2xl text-center mb-6">فاتورة علاج</h2>
+            
+            <p><strong>📝 الاسم:</strong> ${p.name}</p>
+            <p><strong>🪪 رقم الهوية:</strong> ${p.nationalId}</p>
+            <p><strong>📱 رقم الهاتف:</strong> ${p.phone || '-'}</p>
+            <p><strong>📅 التاريخ:</strong> ${formatDateArabic(p.date)}</p>
+            <p><strong>💰 التكلفة:</strong> ${toLatinNumbers(p.cost)} $</p>
+            <p><strong>‼️ نسبة الحسم:</strong> ${toLatinNumbers(discountPercent)}% - المبلغ المخصوم: ${toLatinNumbers(discountAmount.toFixed(2))} $</p>
+            
+            <hr>
+            
+            <h3 class="mt-5 mb-3">💲 تفاصيل الدفعات 💲</h3>
+            <table>
+                <thead>
+                    <tr><th>التاريخ</th><th>المبلغ</th><th>ملاحظات</th></tr>
+                </thead>
+                <tbody>${paymentsTable}</tbody>
+            </table>
+            
+            <p class="text-xl font-bold mt-6">المدفوع: <span style="color:#10b981">${toLatinNumbers(totalPaid)} $</span></p>
+            <p class="text-xl font-bold">المتبقي: <span style="color:#ef4444">${toLatinNumbers(remaining.toFixed(2))} $</span></p>
+            
+            <!-- الفوتر الجديد -->
+            <div class="footer">
+                <div class="footer-line"></div>
+                <strong>DentPro - مركز دينت برو للعناية بالأسنان</strong><br>
+                حلب - جانب المتحف - خلف شارع بارون - قريب من فندق ريغا<br>
+                <strong>📞 ${'00963932710759'} - ${'00963994241724'}</strong>
+            </div>
+            
+            <p class="mt-9 text-center text-xl">🌟💫✨🦷 شكراً لثقتكم 🦷✨💫🌟</p>
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
 
         function showSection(sec) {
             document.querySelectorAll('[id^="section-"]').forEach(s => s.classList.add('hidden'));
